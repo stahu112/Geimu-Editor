@@ -7,7 +7,7 @@ void Level::addTile(float x, float y)
 	x = floor(x / 32);
 	y = floor(y / 32);
 
-	if (tiles[x][y])
+	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
 	{
 		tiles[x][y]->id = 1;
 
@@ -20,9 +20,12 @@ void Level::removeTile(float x, float y)
 	x = floor(x / 32);
 	y = floor(y / 32);
 
-	tiles[x][y]->id = 0;
+	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
+	{
+		tiles[x][y]->id = 0;
 
-	list[y][x] = 0;
+		list[y][x] = 0;
+	}
 }
 
 void Level::drawTiles(sf::RenderWindow * window)
