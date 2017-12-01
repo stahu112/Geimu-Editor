@@ -28,6 +28,45 @@ void Level::removeTile(float x, float y)
 	}
 }
 
+void Level::addSpriteTile(float x, float y, int xt, int yt, bool back)
+{
+	x = floor(x / 32);
+	y = floor(y / 32);
+
+
+
+	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
+	{
+		spriteTiles[x][y]->shape.setTextureRect(sf::IntRect(xt*32, yt*32, 32, 32));
+
+		if (back)
+		{
+			spriteTiles[x][y]->id = 2;
+		}
+		else
+		{
+			spriteTiles[x][y]->id = 1;
+		}
+
+		if(back) spriteList[y][x] = xt + "#" + yt;
+		else spriteList[y][x] = xt + "," + yt;
+	}
+
+}
+
+void Level::removeSpriteTile(float x, float y)
+{
+	x = floor(x / 32);
+	y = floor(y / 32);
+
+	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
+	{
+		spriteTiles[x][y]->id = 0;
+
+		spriteList[y][x] = "x,x";
+	}
+}
+
 void Level::drawTiles(sf::RenderWindow * window)
 {
 	for (int i = 0; i < tiles.size(); i++)
@@ -35,17 +74,27 @@ void Level::drawTiles(sf::RenderWindow * window)
 		for (int j = 0; j < tiles[i].size(); j++)
 		{
 			if (tiles[i][j]->id) window->draw(tiles[i][j]->shape);
+			if (spriteTiles[i][j]->id) window->draw(spriteTiles[i][j]->shape);
 		}
 	}
 }
 
-Level::Level(unsigned width, unsigned height, std::string id)
+Level::Level(unsigned width, unsigned height, std::string id, std::string levelid, std::string path)
 {
 	levid = id;
+	spriteid = levelid;
+
+	sf::Texture tex;
+
+	tex.loadFromFile(path);
+
+	tile.setTexture(tex);
 
 	size.x = width;
 	size.y = height;
 	numOfTiles = size.x * size.y;
+
+	////////////////////////////////////////
 
 	list.resize(size.y);
 
@@ -77,6 +126,40 @@ Level::Level(unsigned width, unsigned height, std::string id)
 			tiles[i][j]->id = 0;
 		}
 	}
+
+	//////////////////////////////////
+
+	spriteList.resize(size.y);
+
+	for (int i = 0; i < spriteList.size(); i++)
+	{
+		spriteList[i].resize(size.x);
+	}
+
+	for (int i = 0; i < spriteList.size(); i++)
+	{
+		for (int j = 0; j < spriteList[i].size(); j++)
+		{
+			spriteList[i][j] = "x,x";
+		}
+	}
+
+	spriteTiles.resize(size.x);
+
+	for (int i = 0; i < spriteTiles.size(); i++)
+	{
+		spriteTiles[i].resize(size.y);
+	}
+
+	for (int i = 0; i < spriteTiles.size(); i++)
+	{
+		for (int j = 0; j < spriteTiles[i].size(); j++)
+		{
+			spriteTiles[i][j] = new SpriteTile(i, j, tex);
+			spriteTiles[i][j]->id = 0;
+		}
+	}
+
 }
 
 void Level::saveLevel()
@@ -99,6 +182,25 @@ void Level::saveLevel()
 	}
 
 	file.close();
+
+	std::fstream fileS;
+
+	fileS.open(spriteid + ".txt", std::ios::out);
+
+	if (fileS.good())
+	{
+		for (int i = 0; i < spriteList.size(); i++)
+		{
+			for (int j = 0; j < spriteList[i].size(); j++)
+			{
+				if (j + 1 != spriteList[i].size()) fileS << spriteList[i][j] << " ";
+				else fileS << spriteList[i][j];
+			}
+			fileS << "\n";
+		}
+	}
+
+	fileS.close();
 }
 
 Level::~Level()
