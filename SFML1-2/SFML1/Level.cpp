@@ -1,5 +1,5 @@
 #include "Level.h"
-
+#include <string>
 #include <fstream>
 
 void Level::addTile(float x, float y)
@@ -28,6 +28,19 @@ void Level::removeTile(float x, float y)
 	}
 }
 
+void Level::fill(float xt, float yt, bool back)
+{
+	for (int i = 0; i < spriteTiles.size(); i++)
+	{
+		for (int j = 0; j < spriteTiles[i].size(); j++)
+		{
+			spriteTiles[i][j]->shape.setTextureRect(sf::IntRect(xt, yt, 32, 32));
+			if( back ) spriteTiles[i][j]->id = 2;
+			else spriteTiles[i][j]->id = 1;
+		}
+	}
+}
+
 void Level::addSpriteTile(float x, float y, int xt, int yt, bool back)
 {
 	x = floor(x / 32);
@@ -37,7 +50,7 @@ void Level::addSpriteTile(float x, float y, int xt, int yt, bool back)
 
 	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
 	{
-		spriteTiles[x][y]->shape.setTextureRect(sf::IntRect(xt*32, yt*32, 32, 32));
+		spriteTiles[x][y]->shape.setTextureRect(sf::IntRect(xt, yt, 32, 32));
 
 		if (back)
 		{
@@ -48,8 +61,8 @@ void Level::addSpriteTile(float x, float y, int xt, int yt, bool back)
 			spriteTiles[x][y]->id = 1;
 		}
 
-		if(back) spriteList[y][x] = xt + "#" + yt;
-		else spriteList[y][x] = xt + "," + yt;
+		if(back) spriteList[y][x] = std::to_string(xt/32) + "#" + std::to_string(yt/32);
+		else spriteList[y][x] = std::to_string(xt/32) + "," + std::to_string(yt/32);
 	}
 
 }
@@ -73,8 +86,18 @@ void Level::drawTiles(sf::RenderWindow * window)
 	{
 		for (int j = 0; j < tiles[i].size(); j++)
 		{
-			if (tiles[i][j]->id) window->draw(tiles[i][j]->shape);
-			if (spriteTiles[i][j]->id) window->draw(spriteTiles[i][j]->shape);
+			if (spriteTiles[i][j]->id)
+			{
+				if(spriteTiles[i][j]->id > 1) spriteTiles[i][j]->shape.setFillColor(sf::Color(spriteTiles[i][j]->shape.getFillColor().r, spriteTiles[i][j]->shape.getFillColor().g, spriteTiles[i][j]->shape.getFillColor().b, 100));
+				else spriteTiles[i][j]->shape.setFillColor(sf::Color(spriteTiles[i][j]->shape.getFillColor().r, spriteTiles[i][j]->shape.getFillColor().g, spriteTiles[i][j]->shape.getFillColor().b, 255));
+				
+				window->draw(spriteTiles[i][j]->shape);
+			}
+
+			if (tiles[i][j]->id)
+			{
+				window->draw(tiles[i][j]->shape);
+			}
 		}
 	}
 }

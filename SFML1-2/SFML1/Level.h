@@ -23,10 +23,13 @@ public:
 	unsigned numOfTiles;
 
 	std::vector<std::vector<int>> list;
+
 	std::vector<std::vector<std::string>> spriteList;
 
 	void addTile(float x, float y);
 	void removeTile(float x, float y);
+
+	void fill(float xt, float yt, bool back);
 
 	void addSpriteTile(float x, float y, int xt, int yt, bool back);
 	void removeSpriteTile(float x, float y);

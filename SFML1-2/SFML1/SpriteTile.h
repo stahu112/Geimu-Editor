@@ -10,7 +10,9 @@ public:
 
 	sf::Vector2f position;
 
-	sf::Sprite shape;
+	sf::Texture tex;
+
+	sf::RectangleShape shape;
 
 	SpriteTile(float x, float y, sf::Texture tex);
 	~SpriteTile();

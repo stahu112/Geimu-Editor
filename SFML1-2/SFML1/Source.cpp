@@ -25,6 +25,7 @@ int x = 0, y = 0, w, h;
 float zoom = 1;
 
 bool toggle = true;
+bool back = false;
 
 float xt = 0, yt = 0;
 
@@ -78,8 +79,6 @@ int main()
 		sf::Event e;
 		pollEvent(e);
 
-		bool back = false;
-
 		x = sf::Mouse::getPosition(window).x;
 		y = sf::Mouse::getPosition(window).y;
 		sf::Vector2f pos(window.mapPixelToCoords(sf::Vector2i(x, y)));
@@ -97,6 +96,8 @@ int main()
 
 		window.clear(sf::Color(255, 255, 255, 255));
 
+		levels[counter]->drawTiles(&window);
+
 		if (toggle)
 		{
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) levels[counter]->addTile(pos.x, pos.y);
@@ -106,21 +107,26 @@ int main()
 		}
 		else
 		{
-			if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) levels[counter]->addSpriteTile(pos.x, pos.y, xt, yt, false);
-			else if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back) levels[counter]->addSpriteTile(pos.x, pos.y, xt, yt, true);
+			if (back)
+			{
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) levels[counter]->addSpriteTile(pos.x, pos.y, xt, yt, true);
+			}
+			else
+			{
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) levels[counter]->addSpriteTile(pos.x, pos.y, xt, yt, false);
+			}
+
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) levels[counter]->removeSpriteTile(pos.x, pos.y);
 
 			window.draw(curs1);
 		}
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) x1 += 10;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) x1 -= 10;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) y1 += 10;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) y1 -= 10;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))  x1 += 10;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))  x1 -= 10;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))  y1 += 10;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))  y1 -= 10;
 
 		levels[counter]->saveLevel();
-
-		levels[counter]->drawTiles(&window);
 
 		window.draw(gridX);
 		window.draw(gridY);
@@ -142,14 +148,19 @@ void pollEvent(sf::Event e)
 		}
 		if (e.type == sf::Event::KeyReleased)
 		{
-			if (e.key.code == sf::Keyboard::Right) xt += 32;
-			if (e.key.code == sf::Keyboard::Left && xt > -32) xt -= 32;
+			if (e.key.code == sf::Keyboard::Right && xt < 9 * 32) { xt += 32; std::cout << "Rect: " << xt / 32 << " " << yt / 32 << std::endl; }
+			if (e.key.code == sf::Keyboard::Left && xt > -32) { xt -= 32; std::cout << "Rect: " << xt / 32 << " " << yt / 32 << std::endl; }
 
-			if (e.key.code == sf::Keyboard::Up) yt += 32;
-			if (e.key.code == sf::Keyboard::Down && yt > -32) yt -= 32;
+			if (e.key.code == sf::Keyboard::Up && yt < 9 * 32) { yt += 32; std::cout << "Rect: " << xt / 32 << " " << yt / 32 << std::endl; }
+			if (e.key.code == sf::Keyboard::Down && yt > -32) { yt -= 32; std::cout << "Rect: " << xt / 32 << " " << yt / 32 << std::endl; }
 
-			if (e.key.code == sf::Keyboard::LShift) toggle = true;
-			if (e.key.code == sf::Keyboard::LControl) toggle = false;
+			if (e.key.code == sf::Keyboard::LShift) { toggle = true; std::cout << "Collision mapping: On" << std::endl; }
+			if (e.key.code == sf::Keyboard::LControl) { toggle = false; std::cout << "Collision mapping: Off" << std::endl; }
+
+			if (e.key.code == sf::Keyboard::O) { back = true; std::cout << "Background mapping: On" << std::endl; }
+			if (e.key.code == sf::Keyboard::P) { back = false; std::cout << "Background mapping: Off" << std::endl; }
+
+			if (e.key.code == sf::Keyboard::C) { levels[counter]->fill(xt, yt, back); }
 
 		}
 

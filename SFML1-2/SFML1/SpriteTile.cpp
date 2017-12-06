@@ -2,11 +2,14 @@
 
 
 
-SpriteTile::SpriteTile(float x, float y, sf::Texture tex)
+SpriteTile::SpriteTile(float x, float y, sf::Texture tex1)
 {
+	shape = sf::RectangleShape(sf::Vector2f(32, 32));
+
 	shape.setPosition(x * 32, y * 32);
 
-	shape.setTexture(tex);
+	tex = tex1;
+	shape.setTexture(&tex);
 }
 
 
