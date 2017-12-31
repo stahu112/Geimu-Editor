@@ -1,6 +1,9 @@
 #include "Level.h"
 #include <string>
 #include <fstream>
+#include <iostream>
+std::fstream file2;
+std::fstream file1;
 
 void Level::addTile(float x, float y)
 {
@@ -45,8 +48,6 @@ void Level::addSpriteTile(float x, float y, int xt, int yt, bool back)
 {
 	x = floor(x / 32);
 	y = floor(y / 32);
-
-
 
 	if (x >= 0 && x < size.x && y >= 0 && y < size.y)
 	{

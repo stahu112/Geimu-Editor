@@ -6,9 +6,11 @@
 
 void pollEvent(sf::Event e);
 
-void addLevel(unsigned w, unsigned h, std::string id);
+void addLevel(unsigned w, unsigned h);
 
 void makeGrid(sf::VertexArray& gridX, sf::VertexArray& gridY);
+
+void loadLevel(std::string pathCol, std::string pathTile);
 
 int counter = -1;
 
@@ -31,36 +33,38 @@ float xt = 0, yt = 0;
 
 std::string id;
 std::string spriteid;
+sf::Vector2f pos;
+bool isNew = true;
 
 int main()
 {
-	std::cout << "ID col" << std::endl;
-
+	std::cout << "Nazwa dla nowego pliku kolizji: " << std::endl;
 	std::cin >> id;
 
-	std::cout << "ID sprite" << std::endl;
-
+	std::cout << "Nazwa dla nowej tilemapy: " << std::endl;
 	std::cin >> spriteid;
 
-	std::cout << "X" << std::endl;
+	std::cout << "Szerokosc: " << std::endl;
 	std::cin >> w;
 
-	std::cout << "Y" << std::endl;
+	std::cout << "Wysokosc: " << std::endl;
 	std::cin >> h;
+
+	addLevel(w, h);
 
 	sf::Sprite tile;
 
-	sf::VertexArray gridX(sf::Lines, (h + 1)* 2 );
-	sf::VertexArray gridY(sf::Lines, (w + 1)* 2 );
+	sf::VertexArray gridX(sf::Lines, (h + 1) * 2);
+	sf::VertexArray gridY(sf::Lines, (w + 1) * 2);
 
 	makeGrid(gridX, gridY);
 
-	levelView.setSize(sf::Vector2f(w * 32 * zoom, h * 32 * zoom));
+	levelView.setSize(sf::Vector2f(22 * 32 * zoom, 12 * 32 * zoom));
 
 	window.setMouseCursorVisible(false);
 
 	curs.setSize(sf::Vector2f(16, 16));
-	curs.setFillColor(sf::Color(0,255,0,155));
+	curs.setFillColor(sf::Color(0, 255, 0, 155));
 
 	sf::Texture tex;
 	tex.loadFromFile("tilemap.png");
@@ -68,11 +72,11 @@ int main()
 	curs1.setSize(sf::Vector2f(32, 32));
 	curs1.setTexture(&tex);
 	curs1.setTextureRect(sf::IntRect(xt, yt, 32, 32));
-	//curs1.setFillColor(sf::Color(curs1.getFillColor().r, curs1.getFillColor().g, curs1.getFillColor().b, 100));
-
-	addLevel(w, h, id);
+	curs1.setFillColor(sf::Color(curs1.getFillColor().r - 50, curs1.getFillColor().g - 50, curs1.getFillColor().b - 50, 255));
 
 	float x1 = 0, y1 = 0;
+
+	float timer1 = 0;
 
 	while (window.isOpen())
 	{
@@ -81,12 +85,12 @@ int main()
 
 		x = sf::Mouse::getPosition(window).x;
 		y = sf::Mouse::getPosition(window).y;
-		sf::Vector2f pos(window.mapPixelToCoords(sf::Vector2i(x, y)));
-		
+		pos = sf::Vector2f(window.mapPixelToCoords(sf::Vector2i(x, y)));
+
 		sf::Vector2f posV(x1, y1);
 
 		levelView.setCenter(posV);
-		levelView.setSize(sf::Vector2f(w * 32 * zoom, ((h * 32) - 12) * zoom));
+		levelView.setSize(sf::Vector2f(20 * 32 * zoom, ((12 * 32) - 12) * zoom));
 		window.setView(levelView);
 
 		curs1.setTextureRect(sf::IntRect(xt, yt, 32, 32));
@@ -95,6 +99,8 @@ int main()
 		curs1.setPosition(pos);
 
 		window.clear(sf::Color(255, 255, 255, 255));
+
+		timer1 += 0.16f;
 
 		levels[counter]->drawTiles(&window);
 
@@ -125,8 +131,13 @@ int main()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))  x1 -= 10;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))  y1 += 10;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))  y1 -= 10;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) { levels[counter]->saveLevel(); std::cout << "SAVED" << std::endl; }
 
-		levels[counter]->saveLevel();
+		if (timer1 > 20.f)
+		{
+			levels[counter]->saveLevel();
+			timer1 = 0;
+		}
 
 		window.draw(gridX);
 		window.draw(gridY);
@@ -156,6 +167,7 @@ void pollEvent(sf::Event e)
 
 			if (e.key.code == sf::Keyboard::LShift) { toggle = true; std::cout << "Collision mapping: On" << std::endl; }
 			if (e.key.code == sf::Keyboard::LControl) { toggle = false; std::cout << "Collision mapping: Off" << std::endl; }
+			if (e.key.code == sf::Keyboard::U) { std::cout << "X: " << pos.x << " Y: " << pos.y << std::endl; }
 
 			if (e.key.code == sf::Keyboard::O) { back = true; std::cout << "Background mapping: On" << std::endl; }
 			if (e.key.code == sf::Keyboard::P) { back = false; std::cout << "Background mapping: Off" << std::endl; }
@@ -171,7 +183,7 @@ void pollEvent(sf::Event e)
 	}
 }
 
-void addLevel(unsigned w, unsigned h, std::string id)
+void addLevel(unsigned w, unsigned h)
 {
 	levels.emplace_back(new Level(w, h, id, spriteid, "tilemap.png"));
 	counter++;

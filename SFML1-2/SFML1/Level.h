@@ -37,7 +37,6 @@ public:
 	void drawTiles(sf::RenderWindow * window);
 
 	Level(unsigned width, unsigned height, std::string id, std::string levelid, std::string path);
-
 	void saveLevel();
 	~Level();
 };
